@@ -114,7 +114,7 @@ class BussolaAPITester:
         success, response = self.run_test(
             "Get Employees",
             "GET",
-            "employees",
+            "employees/",
             200
         )
         return success, response
