@@ -277,3 +277,196 @@ class AuditService:
     async def get_recent_logs(self, limit: int = 100) -> List[AuditLog]:
         docs = await self.audit_repo.find_recent(limit)
         return [AuditLog(**doc) for doc in docs]
+
+    async def acknowledge_measure(self, measure_id: str, user: dict) -> Optional[Measure]:
+        """Colaborador dá RECEBIDO na medida"""
+        measure = await self.measure_repo.find_by_id(measure_id)
+        if not measure:
+            raise ValueError("Medida não encontrada")
+        
+        if measure['status'] != MeasureStatus.PENDENTE_RECEBIMENTO.value:
+            raise ValueError("Medida não está pendente de recebimento")
+        
+        # Verificar se é o próprio colaborador
+        employee = await self.employee_repo.find_by_id(measure['employee_id'])
+        if not employee or employee.get('email') != user.get('email'):
+            raise ValueError("Apenas o colaborador pode dar recebido na própria medida")
+        
+        update_data = {
+            "status": MeasureStatus.RECEBIDO.value,
+            "acknowledged_at": datetime.now(timezone.utc).isoformat(),
+            "acknowledged_by_id": user['id'],
+            "acknowledged_by_name": user['name']
+        }
+        
+        doc = await self.measure_repo.update(measure_id, update_data)
+        
+        await self._create_audit_log("ACKNOWLEDGE_MEASURE", "measure", measure_id, user, {
+            "employee_name": measure['employee_name']
+        })
+        
+        return Measure(**doc) if doc else None
+    
+    async def acknowledge_with_witnesses(
+        self, 
+        measure_id: str, 
+        witness1_email: str, 
+        witness1_password: str,
+        witness2_email: str,
+        witness2_password: str,
+        supervisor: dict,
+        user_repo
+    ) -> Optional[Measure]:
+        """Supervisor dá RECEBIDO com 2 testemunhas quando colaborador se recusa"""
+        measure = await self.measure_repo.find_by_id(measure_id)
+        if not measure:
+            raise ValueError("Medida não encontrada")
+        
+        if measure['status'] != MeasureStatus.PENDENTE_RECEBIMENTO.value:
+            raise ValueError("Medida não está pendente de recebimento")
+        
+        # Validar testemunha 1
+        witness1 = await user_repo.find_by_email(witness1_email)
+        if not witness1:
+            raise ValueError("Primeira testemunha não encontrada")
+        
+        if not verify_password(witness1_password, witness1['password_hash']):
+            raise ValueError("Senha incorreta para primeira testemunha")
+        
+        if witness1['role'] not in [UserRole.GERENTE.value, UserRole.COORDENADOR.value, UserRole.SUPERVISOR.value]:
+            raise ValueError("Primeira testemunha deve ser Gerente, Coordenador ou Supervisor")
+        
+        # Validar testemunha 2
+        witness2 = await user_repo.find_by_email(witness2_email)
+        if not witness2:
+            raise ValueError("Segunda testemunha não encontrada")
+        
+        if not verify_password(witness2_password, witness2['password_hash']):
+            raise ValueError("Senha incorreta para segunda testemunha")
+        
+        if witness2['role'] not in [UserRole.GERENTE.value, UserRole.COORDENADOR.value, UserRole.SUPERVISOR.value]:
+            raise ValueError("Segunda testemunha deve ser Gerente, Coordenador ou Supervisor")
+        
+        # Testemunhas não podem ser a mesma pessoa
+        if witness1['id'] == witness2['id']:
+            raise ValueError("As testemunhas devem ser pessoas diferentes")
+        
+        now = datetime.now(timezone.utc).isoformat()
+        witnesses_data = [
+            {
+                "user_id": witness1['id'],
+                "user_name": witness1['name'],
+                "user_role": witness1['role'],
+                "timestamp": now
+            },
+            {
+                "user_id": witness2['id'],
+                "user_name": witness2['name'],
+                "user_role": witness2['role'],
+                "timestamp": now
+            }
+        ]
+        
+        update_data = {
+            "status": MeasureStatus.RECEBIDO_COM_TESTEMUNHAS.value,
+            "acknowledged_at": now,
+            "acknowledged_by_id": supervisor['id'],
+            "acknowledged_by_name": supervisor['name'],
+            "witnesses": witnesses_data
+        }
+        
+        doc = await self.measure_repo.update(measure_id, update_data)
+        
+        await self._create_audit_log("ACKNOWLEDGE_WITH_WITNESSES", "measure", measure_id, supervisor, {
+            "employee_name": measure['employee_name'],
+            "witnesses": [witness1['name'], witness2['name']]
+        })
+        
+        return Measure(**doc) if doc else None
+
+class TeamService:
+    def __init__(self, team_repo: TeamRepository, user_repo: UserRepository, employee_repo: EmployeeRepository, audit_repo: AuditLogRepository):
+        self.team_repo = team_repo
+        self.user_repo = user_repo
+        self.employee_repo = employee_repo
+        self.audit_repo = audit_repo
+    
+    async def create_team(self, request: CreateTeamRequest, user: dict) -> Team:
+        manager = await self.user_repo.find_by_id(request.manager_id)
+        if not manager:
+            raise ValueError("Gerente não encontrado")
+        
+        team_id = str(uuid.uuid4())
+        team_doc = {
+            "id": team_id,
+            "name": request.name,
+            "manager_id": request.manager_id,
+            "manager_name": manager['name'],
+            "parent_team_id": request.parent_team_id,
+            "level": request.level,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await self.team_repo.create(team_doc)
+        
+        await self._create_audit_log("CREATE_TEAM", "team", team_id, user, {
+            "team_name": request.name,
+            "manager": manager['name']
+        })
+        
+        return Team(**team_doc)
+    
+    async def migrate_employee(self, request: MigrateEmployeeRequest, user: dict) -> Optional[Employee]:
+        """Migra colaborador para nova equipe/supervisor"""
+        employee = await self.employee_repo.find_by_id(request.employee_id)
+        if not employee:
+            raise ValueError("Colaborador não encontrado")
+        
+        new_supervisor = await self.user_repo.find_by_id(request.new_supervisor_id)
+        if not new_supervisor:
+            raise ValueError("Novo supervisor não encontrado")
+        
+        update_data = {
+            "supervisor_id": request.new_supervisor_id,
+            "team_id": request.new_team_id
+        }
+        
+        doc = await self.employee_repo.update(request.employee_id, update_data)
+        
+        await self._create_audit_log("MIGRATE_EMPLOYEE", "employee", request.employee_id, user, {
+            "employee_name": employee['name'],
+            "new_supervisor": new_supervisor['name']
+        })
+        
+        return Employee(**doc) if doc else None
+    
+    async def get_team_hierarchy(self, user: dict) -> dict:
+        """Retorna hierarquia de equipes do usuário"""
+        teams = await self.team_repo.find_by_manager(user['id'])
+        
+        hierarchy = {
+            "direct_reports": [],
+            "teams": teams
+        }
+        
+        # Buscar subordinados diretos
+        if user['role'] in [UserRole.GERENTE.value, UserRole.COORDENADOR.value, UserRole.SUPERVISOR.value]:
+            direct_reports = await self.user_repo.find_by_manager(user['id'])
+            hierarchy["direct_reports"] = direct_reports
+        
+        return hierarchy
+    
+    async def _create_audit_log(self, action: str, entity_type: str, entity_id: str, user: dict, details: dict):
+        log_doc = {
+            "id": str(uuid.uuid4()),
+            "action": action,
+            "entity_type": entity_type,
+            "entity_id": entity_id,
+            "user_id": user['id'],
+            "user_name": user['name'],
+            "user_role": user['role'],
+            "details": details,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await self.audit_repo.create(log_doc)
+
