@@ -125,28 +125,54 @@ class MeasureService:
         if not employee.get('active', True):
             raise ValueError("Colaborador inativo")
         
+        # VALIDAÇÃO: Verificar escalonamento de medidas
+        previous_measures = await self.measure_repo.find_by_employee(request.employee_id)
+        
+        is_valid, error_msg = MeasureEscalationValidator.validate_measure_escalation(
+            previous_measures,
+            request.infraction_category,
+            request.measure_type
+        )
+        
+        if not is_valid:
+            raise ValueError(error_msg)
+        
         measure_id = str(uuid.uuid4())
         measure_doc = {
             "id": measure_id,
             "employee_id": request.employee_id,
             "employee_name": employee['name'],
             "measure_type": request.measure_type.value,
+            "infraction_category": request.infraction_category.value,
             "reason": request.reason,
             "description": request.description,
             "applied_by_id": user['id'],
             "applied_by_name": user['name'],
-            "status": MeasureStatus.PENDENTE.value,
+            "status": MeasureStatus.PENDENTE_RECEBIMENTO.value,
             "suspension_days": request.suspension_days,
             "applied_at": datetime.now(timezone.utc).isoformat(),
+            "acknowledged_at": None,
+            "acknowledged_by_id": None,
+            "acknowledged_by_name": None,
+            "witnesses": None,
             "signed_at": None,
             "signed_by_id": None,
             "signed_by_name": None,
             "canceled_at": None,
             "canceled_by_id": None,
-            "canceled_reason": None
+            "canceled_reason": None,
+            "document_template_path": None
         }
         
         await self.measure_repo.create(measure_doc)
+        
+        await self._create_audit_log("APPLY_MEASURE", "measure", measure_id, user, {
+            "employee_name": employee['name'],
+            "measure_type": request.measure_type.value,
+            "infraction_category": request.infraction_category.value
+        })
+        
+        return Measure(**measure_doc)
         
         await self._create_audit_log("APPLY_MEASURE", "measure", measure_id, user, {
             "employee_name": employee['name'],
