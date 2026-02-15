@@ -23,8 +23,11 @@ app.state.db = db
 api_router = APIRouter(prefix="/api")
 
 api_router.include_router(auth_router, prefix="/auth", tags=["auth"])
+api_router.include_router(user_router, prefix="/users", tags=["users"])
 api_router.include_router(employee_router, prefix="/employees", tags=["employees"])
 api_router.include_router(measure_router, prefix="/measures", tags=["measures"])
+api_router.include_router(team_router, prefix="/teams", tags=["teams"])
+api_router.include_router(document_router, prefix="/documents", tags=["documents"])
 api_router.include_router(audit_router, prefix="/audit", tags=["audit"])
 
 app.include_router(api_router)
