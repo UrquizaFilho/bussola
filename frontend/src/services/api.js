@@ -65,8 +65,8 @@ export const teamApi = {
 };
 
 export const userApi = {
-  getAll: () => api.get('/users'),
-  create: (data) => api.post('/users', data),
+  getAll: () => api.get('/users/'),
+  create: (data) => api.post('/users/', data),
   getHierarchy: () => api.get('/users/hierarchy'),
 };
 
