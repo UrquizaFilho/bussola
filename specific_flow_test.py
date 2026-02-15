@@ -149,7 +149,7 @@ class SpecificFlowTester:
             
         measure_data = {
             "employee_id": self.maria_id,
-            "type": "advertencia",
+            "measure_type": "advertencia",
             "reason": "Falta não justificada",
             "description": "Colaboradora faltou ao trabalho sem apresentar justificativa adequada conforme política da empresa."
         }
