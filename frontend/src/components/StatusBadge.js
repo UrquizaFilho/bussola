@@ -2,10 +2,20 @@ import React from 'react';
 import { AlertTriangle, FileX, CheckCircle, Clock } from 'lucide-react';
 
 const statusConfig = {
-  pendente: {
-    label: 'Pendente',
-    className: 'text-slate-700 bg-slate-50 border-slate-200',
+  pendente_recebimento: {
+    label: 'Pendente Recebimento',
+    className: 'text-amber-700 bg-amber-50 border-amber-200',
     icon: Clock,
+  },
+  recebido: {
+    label: 'Recebido',
+    className: 'text-blue-700 bg-blue-50 border-blue-200',
+    icon: CheckCircle,
+  },
+  recebido_com_testemunhas: {
+    label: 'Recebido (Testemunhas)',
+    className: 'text-purple-700 bg-purple-50 border-purple-200',
+    icon: CheckCircle,
   },
   assinado: {
     label: 'Assinado',
@@ -16,6 +26,12 @@ const statusConfig = {
     label: 'Cancelado',
     className: 'text-slate-700 bg-slate-50 border-slate-200',
     icon: FileX,
+  },
+  // Backward compatibility
+  pendente: {
+    label: 'Pendente',
+    className: 'text-slate-700 bg-slate-50 border-slate-200',
+    icon: Clock,
   },
 };
 
