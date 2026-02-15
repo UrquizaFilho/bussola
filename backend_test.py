@@ -165,7 +165,7 @@ class BussolaAPITester:
         success, response = self.run_test(
             "Get Measures",
             "GET",
-            "measures",
+            "measures/",
             200
         )
         return success, response
