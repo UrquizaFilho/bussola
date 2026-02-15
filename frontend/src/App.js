@@ -10,6 +10,10 @@ import NewEmployeePage from "./pages/NewEmployeePage";
 import EmployeeDetailPage from "./pages/EmployeeDetailPage";
 import MeasuresPage from "./pages/MeasuresPage";
 import NewMeasurePage from "./pages/NewMeasurePage";
+import AcknowledgeMeasurePage from "./pages/AcknowledgeMeasurePage";
+import WitnessAcknowledgePage from "./pages/WitnessAcknowledgePage";
+import HierarchyPage from "./pages/HierarchyPage";
+import DocumentsPage from "./pages/DocumentsPage";
 import AuditPage from "./pages/AuditPage";
 
 const PrivateRoute = ({ children }) => {
@@ -73,6 +77,38 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <NewMeasurePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/measures/acknowledge"
+        element={
+          <PrivateRoute>
+            <AcknowledgeMeasurePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/measures/acknowledge-witnesses"
+        element={
+          <PrivateRoute>
+            <WitnessAcknowledgePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/hierarchy"
+        element={
+          <PrivateRoute>
+            <HierarchyPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/documents"
+        element={
+          <PrivateRoute>
+            <DocumentsPage />
           </PrivateRoute>
         }
       />
