@@ -14,6 +14,7 @@ import AcknowledgeMeasurePage from "./pages/AcknowledgeMeasurePage";
 import WitnessAcknowledgePage from "./pages/WitnessAcknowledgePage";
 import HierarchyPage from "./pages/HierarchyPage";
 import DocumentsPage from "./pages/DocumentsPage";
+import UsersManagementPage from "./pages/UsersManagementPage";
 import AuditPage from "./pages/AuditPage";
 
 const PrivateRoute = ({ children }) => {
