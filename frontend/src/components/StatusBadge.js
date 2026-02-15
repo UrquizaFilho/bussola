@@ -36,8 +36,13 @@ const statusConfig = {
 };
 
 const typeConfig = {
-  advertencia: {
-    label: 'Advertência',
+  advertencia_verbal: {
+    label: 'Advertência Verbal',
+    className: 'text-yellow-700 bg-yellow-50 border-yellow-200',
+    icon: AlertTriangle,
+  },
+  advertencia_escrita: {
+    label: 'Advertência Escrita',
     className: 'text-amber-700 bg-amber-50 border-amber-200',
     icon: AlertTriangle,
   },
@@ -45,6 +50,12 @@ const typeConfig = {
     label: 'Suspensão',
     className: 'text-red-700 bg-red-50 border-red-200',
     icon: FileX,
+  },
+  // Backward compatibility
+  advertencia: {
+    label: 'Advertência',
+    className: 'text-amber-700 bg-amber-50 border-amber-200',
+    icon: AlertTriangle,
   },
 };
 
