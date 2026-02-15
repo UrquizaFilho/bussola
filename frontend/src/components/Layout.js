@@ -26,6 +26,11 @@ export const Sidebar = () => {
     return item.roles.includes(user?.role);
   });
 
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.roles.includes('all')) return true;
+    return item.roles.includes(user?.role);
+  });
+
   return (
     <div className="sidebar" data-testid="sidebar">
       <div className="p-6 border-b border-white/10">
@@ -35,7 +40,7 @@ export const Sidebar = () => {
       </div>
 
       <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           
