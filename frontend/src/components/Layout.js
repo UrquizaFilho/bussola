@@ -10,6 +10,7 @@ export const Sidebar = () => {
 
   const menuItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard', roles: ['all'] },
+    { path: '/users', icon: Users, label: 'Usuários', roles: ['rh'] },
     { path: '/employees', icon: Users, label: 'Colaboradores', roles: ['all'] },
     { path: '/measures', icon: FileText, label: 'Medidas', roles: ['all'] },
     { path: '/measures/acknowledge', icon: FileText, label: 'Receber Medidas', roles: ['colaborador'] },
