@@ -77,7 +77,7 @@ async def create_user(request: CreateUserRequest, current_user: dict = Depends(r
         raise HTTPException(status_code=400, detail=str(e))
 
 @user_router.get("/")
-async def get_users(current_user: dict = Depends(require_roles(["rh", "gerente"])), db = Depends(get_db)):
+async def get_users(current_user: dict = Depends(require_roles(["rh"])), db = Depends(get_db)):
     user_repo = UserRepository(db)
     users = await user_repo.find_all({"active": True})
     return [{k: v for k, v in u.items() if k != 'password_hash'} for u in users]
