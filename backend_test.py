@@ -199,7 +199,7 @@ class BussolaAPITester:
         success, response = self.run_test(
             "Audit Logs",
             "GET",
-            "audit",
+            "audit/logs",
             200
         )
         return success, response
