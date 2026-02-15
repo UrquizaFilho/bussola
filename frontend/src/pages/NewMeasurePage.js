@@ -7,19 +7,39 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+const INFRACTION_CATEGORIES = [
+  { value: 'atraso', label: 'Atraso' },
+  { value: 'falta_injustificada', label: 'Falta Injustificada' },
+  { value: 'descumprimento_normas', label: 'Descumprimento de Normas' },
+  { value: 'insubordinacao', label: 'Insubordinação' },
+  { value: 'desrespeito', label: 'Desrespeito' },
+  { value: 'negligencia', label: 'Negligência' },
+  { value: 'uso_indevido_recursos', label: 'Uso Indevido de Recursos' },
+  { value: 'outros', label: 'Outros' },
+];
+
+const MEASURE_TYPES = [
+  { value: 'advertencia_verbal', label: 'Advertência Verbal' },
+  { value: 'advertencia_escrita', label: 'Advertência Escrita' },
+  { value: 'suspensao', label: 'Suspensão' },
+];
 
 export default function NewMeasurePage() {
   const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({
     employee_id: '',
     measure_type: '',
+    infraction_category: '',
     reason: '',
     description: '',
     suspension_days: '',
   });
   const [loading, setLoading] = useState(false);
+  const [validationError, setValidationError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,11 +58,13 @@ export default function NewMeasurePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setValidationError('');
 
     try {
       const payload = {
         employee_id: formData.employee_id,
         measure_type: formData.measure_type,
+        infraction_category: formData.infraction_category,
         reason: formData.reason,
         description: formData.description,
       };
@@ -56,7 +78,9 @@ export default function NewMeasurePage() {
       toast.success('Medida aplicada com sucesso!');
       navigate('/measures');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erro ao aplicar medida');
+      const errorMsg = error.response?.data?.detail || 'Erro ao aplicar medida';
+      setValidationError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -77,6 +101,13 @@ export default function NewMeasurePage() {
 
         <div className="bg-white border border-slate-200 rounded-lg p-8">
           <h1 className="text-2xl font-bold text-slate-900 mb-6">Aplicar Medida Disciplinar</h1>
+
+          {validationError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{validationError}</AlertDescription>
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -100,6 +131,29 @@ export default function NewMeasurePage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="infraction_category">Categoria da Infração *</Label>
+              <Select
+                value={formData.infraction_category}
+                onValueChange={(value) => setFormData({ ...formData, infraction_category: value })}
+                required
+              >
+                <SelectTrigger data-testid="infraction-category-select" className="h-10">
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INFRACTION_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500">
+                Sistema valida escalonamento: se colaborador já recebeu verbal pela mesma infração, próxima deve ser escrita.
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="measure_type">Tipo de Medida *</Label>
               <Select
                 value={formData.measure_type}
@@ -110,8 +164,11 @@ export default function NewMeasurePage() {
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="advertencia">Advertência</SelectItem>
-                  <SelectItem value="suspensao">Suspensão</SelectItem>
+                  {MEASURE_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -138,7 +195,7 @@ export default function NewMeasurePage() {
                 id="reason"
                 value={formData.reason}
                 onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                placeholder="Ex: Falta não justificada"
+                placeholder="Ex: Falta não justificada no dia 15/01"
                 required
                 data-testid="reason-input"
                 className="h-10"
