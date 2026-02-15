@@ -16,6 +16,8 @@ from infrastructure.repositories import (
 from interfaces.middleware import get_current_user, require_roles
 import os
 import shutil
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 auth_router = APIRouter()
