@@ -15,6 +15,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 app = FastAPI(title="Bússola - Sistema de Gestão de Medidas Disciplinares")
+app.state.db = db
 
 api_router = APIRouter(prefix="/api")
 
