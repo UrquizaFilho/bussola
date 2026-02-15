@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await axios.get(`${API}/auth/me`);
+      const response = await api.get('/auth/me');
       setUser(response.data);
     } catch (error) {
       console.error('Erro ao buscar usuário:', error);
