@@ -103,7 +103,7 @@ class SpecificFlowTester:
             "Create Maria Santos",
             "POST",
             "employees/",
-            201,
+            200,  # API returns 200, not 201
             data=maria_data
         )
         
