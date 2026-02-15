@@ -20,11 +20,23 @@ const api = axios.create({
   baseURL: API,
 });
 
+// Force HTTPS in all requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Force HTTPS
+  if (config.url && config.url.startsWith('http:')) {
+    config.url = config.url.replace('http:', 'https:');
+  }
+  if (config.baseURL && config.baseURL.startsWith('http:')) {
+    config.baseURL = config.baseURL.replace('http:', 'https:');
+  }
+  
+  console.log('[API Request]', config.method?.toUpperCase(), config.url || config.baseURL);
+  
   return config;
 });
 
