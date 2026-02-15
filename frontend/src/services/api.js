@@ -48,6 +48,8 @@ export const measureApi = {
   getByEmployee: (employeeId) => api.get(`/measures/employee/${employeeId}`),
   getDashboardStats: () => api.get('/measures/dashboard/stats'),
   create: (data) => api.post('/measures', data),
+  acknowledge: (measureId) => api.post('/measures/acknowledge', { measure_id: measureId }),
+  acknowledgeWithWitnesses: (data) => api.post('/measures/acknowledge-witnesses', data),
   sign: (measureId) => api.post('/measures/sign', { measure_id: measureId }),
   cancel: (measureId, reason) => api.post('/measures/cancel', { measure_id: measureId, reason }),
 };
