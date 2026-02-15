@@ -3,15 +3,10 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-// Force HTTPS for API calls
+// Force HTTPS for API calls - HARDCODED FIX
 const getBackendUrl = () => {
-  if (process.env.REACT_APP_BACKEND_URL) {
-    // Ensure the environment variable uses HTTPS
-    return process.env.REACT_APP_BACKEND_URL.replace('http:', 'https:');
-  }
-  // Fallback: ensure HTTPS
-  const origin = window.location.origin;
-  return origin.replace('http:', 'https:');
+  // Hardcode HTTPS URL to fix Mixed Content issue
+  return 'https://medidas-tracker.preview.emergentagent.com';
 };
 
 const BACKEND_URL = getBackendUrl();
