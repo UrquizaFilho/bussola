@@ -114,6 +114,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/users"
+        element={
+          <PrivateRoute>
+            <UsersManagementPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/audit"
         element={
           <PrivateRoute>
