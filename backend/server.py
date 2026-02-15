@@ -5,7 +5,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from interfaces.routes import auth_router, employee_router, measure_router, audit_router
+from interfaces.routes import (
+    auth_router, employee_router, measure_router, audit_router,
+    team_router, document_router, user_router
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
