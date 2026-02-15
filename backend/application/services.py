@@ -189,8 +189,8 @@ class MeasureService:
         if not measure:
             raise ValueError("Medida não encontrada")
         
-        if measure['status'] != MeasureStatus.PENDENTE.value:
-            raise ValueError("Apenas medidas pendentes podem ser assinadas")
+        if measure['status'] not in [MeasureStatus.PENDENTE_RECEBIMENTO.value, MeasureStatus.RECEBIDO.value, MeasureStatus.RECEBIDO_COM_TESTEMUNHAS.value]:
+            raise ValueError("Apenas medidas recebidas podem ser assinadas")
         
         update_data = {
             "status": MeasureStatus.ASSINADO.value,
