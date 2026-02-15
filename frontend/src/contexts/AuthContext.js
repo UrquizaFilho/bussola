@@ -1,16 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
-
-// Force HTTPS for API calls - HARDCODED FIX
-const getBackendUrl = () => {
-  // Hardcode HTTPS URL to fix Mixed Content issue
-  return 'https://medidas-tracker.preview.emergentagent.com';
-};
-
-const BACKEND_URL = getBackendUrl();
-const API = `${BACKEND_URL}/api`;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
