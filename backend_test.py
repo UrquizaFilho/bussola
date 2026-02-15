@@ -149,7 +149,7 @@ class BussolaAPITester:
         success, response = self.run_test(
             "Create Measure",
             "POST",
-            "measures",
+            "measures/",
             201,
             data=measure_data
         )
