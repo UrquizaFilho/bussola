@@ -26,11 +26,6 @@ export const Sidebar = () => {
     return item.roles.includes(user?.role);
   });
 
-  const filteredMenuItems = menuItems.filter(item => {
-    if (item.roles.includes('all')) return true;
-    return item.roles.includes(user?.role);
-  });
-
   return (
     <div className="sidebar" data-testid="sidebar">
       <div className="p-6 border-b border-white/10">
