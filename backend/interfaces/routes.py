@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from application.dto import (
     LoginRequest, LoginResponse,
     CreateEmployeeRequest, UpdateEmployeeRequest,
@@ -8,17 +8,14 @@ from application.dto import (
 from application.services import AuthService, EmployeeService, MeasureService, AuditService
 from infrastructure.repositories import UserRepository, EmployeeRepository, MeasureRepository, AuditLogRepository
 from interfaces.middleware import get_current_user, require_roles
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
-
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
 
 auth_router = APIRouter()
 employee_router = APIRouter()
 measure_router = APIRouter()
 audit_router = APIRouter()
+
+def get_db(request: Request):
+    return request.app.state.db
 
 @auth_router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
