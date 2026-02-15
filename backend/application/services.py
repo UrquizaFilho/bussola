@@ -240,10 +240,11 @@ class MeasureService:
         
         all_measures = await self.measure_repo.find_all({})
         month_measures = [m for m in all_measures if datetime.fromisoformat(m['applied_at']) >= month_start]
-        pending = [m for m in all_measures if m['status'] == MeasureStatus.PENDENTE.value]
+        pending = [m for m in all_measures if m['status'] == MeasureStatus.PENDENTE_RECEBIMENTO.value]
         
         measures_by_type = {
-            "advertencia": len([m for m in month_measures if m['measure_type'] == MeasureType.ADVERTENCIA.value]),
+            "advertencia_verbal": len([m for m in month_measures if m['measure_type'] == MeasureType.ADVERTENCIA_VERBAL.value]),
+            "advertencia_escrita": len([m for m in month_measures if m['measure_type'] == MeasureType.ADVERTENCIA_ESCRITA.value]),
             "suspensao": len([m for m in month_measures if m['measure_type'] == MeasureType.SUSPENSAO.value])
         }
         
