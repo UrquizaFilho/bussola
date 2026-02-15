@@ -58,4 +58,33 @@ export const auditApi = {
   getLogs: (limit = 100) => api.get(`/audit/logs?limit=${limit}`),
 };
 
+export const teamApi = {
+  getAll: () => api.get('/teams'),
+  create: (data) => api.post('/teams', data),
+  migrateEmployee: (data) => api.post('/teams/migrate-employee', data),
+};
+
+export const userApi = {
+  getAll: () => api.get('/users'),
+  create: (data) => api.post('/users', data),
+  getHierarchy: () => api.get('/users/hierarchy'),
+};
+
+export const documentApi = {
+  uploadTemplate: (file, measureType) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (measureType) formData.append('measure_type', measureType);
+    return api.post('/documents/templates/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  getTemplates: () => api.get('/documents/templates'),
+  downloadTemplate: (templateId) => {
+    return api.get(`/documents/templates/download/${templateId}`, {
+      responseType: 'blob'
+    });
+  },
+};
+
 export default api;
