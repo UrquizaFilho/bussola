@@ -9,14 +9,22 @@ export const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/employees', icon: Users, label: 'Colaboradores' },
-    { path: '/measures', icon: FileText, label: 'Medidas' },
+    { path: '/dashboard', icon: Home, label: 'Dashboard', roles: ['all'] },
+    { path: '/employees', icon: Users, label: 'Colaboradores', roles: ['all'] },
+    { path: '/measures', icon: FileText, label: 'Medidas', roles: ['all'] },
+    { path: '/measures/acknowledge', icon: FileText, label: 'Receber Medidas', roles: ['colaborador'] },
+    { path: '/hierarchy', icon: Users, label: 'Hierarquia', roles: ['gerente', 'coordenador', 'supervisor'] },
+    { path: '/documents', icon: FileText, label: 'Documentos', roles: ['rh', 'gerente', 'coordenador', 'supervisor'] },
   ];
 
   if (user?.role === 'juridico' || user?.role === 'rh') {
-    menuItems.push({ path: '/audit', icon: History, label: 'Auditoria' });
+    menuItems.push({ path: '/audit', icon: History, label: 'Auditoria', roles: ['juridico', 'rh'] });
   }
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.roles.includes('all')) return true;
+    return item.roles.includes(user?.role);
+  });
 
   return (
     <div className="sidebar" data-testid="sidebar">
