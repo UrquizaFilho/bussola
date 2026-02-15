@@ -98,7 +98,7 @@ class BussolaAPITester:
         success, response = self.run_test(
             "Create Employee",
             "POST",
-            "employees",
+            "employees/",
             201,
             data=employee_data
         )
