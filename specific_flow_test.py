@@ -127,7 +127,9 @@ class SpecificFlowTester:
             for employee in response:
                 if employee.get('name') == 'Maria Santos':
                     maria_found = True
+                    self.maria_id = employee.get('id')  # Get Maria's ID from the list
                     print(f"   ✅ Maria Santos found in list:")
+                    print(f"      ID: {self.maria_id}")
                     print(f"      Name: {employee.get('name')}")
                     print(f"      CPF: {employee.get('cpf')}")
                     print(f"      Department: {employee.get('department')}")
