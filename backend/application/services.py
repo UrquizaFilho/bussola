@@ -1,7 +1,17 @@
-from infrastructure.repositories import UserRepository, EmployeeRepository, MeasureRepository, AuditLogRepository
+from infrastructure.repositories import (
+    UserRepository, EmployeeRepository, MeasureRepository, 
+    AuditLogRepository, TeamRepository, DocumentTemplateRepository
+)
 from infrastructure.auth import verify_password, get_password_hash, create_access_token
-from domain.entities import User, Employee, Measure, AuditLog, UserRole, MeasureStatus, MeasureType
-from application.dto import CreateEmployeeRequest, CreateMeasureRequest, DashboardStatsResponse
+from domain.entities import (
+    User, Employee, Measure, AuditLog, Team, Witness,
+    UserRole, MeasureStatus, MeasureType, InfractionCategory
+)
+from application.dto import (
+    CreateEmployeeRequest, CreateMeasureRequest, DashboardStatsResponse,
+    CreateUserRequest, CreateTeamRequest, MigrateEmployeeRequest
+)
+from application.measure_validation import MeasureEscalationValidator
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 import uuid
