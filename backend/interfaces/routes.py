@@ -18,7 +18,7 @@ def get_db(request: Request):
     return request.app.state.db
 
 @auth_router.post("/login", response_model=LoginResponse)
-async def login(request: LoginRequest):
+async def login(request: LoginRequest, db = Depends(get_db)):
     user_repo = UserRepository(db)
     auth_service = AuthService(user_repo)
     
@@ -32,7 +32,7 @@ async def login(request: LoginRequest):
     return result
 
 @auth_router.get("/me")
-async def get_current_user_info(current_user: dict = Depends(get_current_user)):
+async def get_current_user_info(current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     user_repo = UserRepository(db)
     user_doc = await user_repo.find_by_id(current_user['sub'])
     if not user_doc:
@@ -40,7 +40,7 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     return {k: v for k, v in user_doc.items() if k != 'password_hash'}
 
 @employee_router.post("/")
-async def create_employee(request: CreateEmployeeRequest, current_user: dict = Depends(get_current_user)):
+async def create_employee(request: CreateEmployeeRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
     employee_service = EmployeeService(employee_repo, audit_repo)
@@ -55,7 +55,7 @@ async def create_employee(request: CreateEmployeeRequest, current_user: dict = D
         raise HTTPException(status_code=400, detail=str(e))
 
 @employee_router.get("/")
-async def get_employees(skip: int = 0, limit: int = 100, current_user: dict = Depends(get_current_user)):
+async def get_employees(skip: int = 0, limit: int = 100, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
     employee_service = EmployeeService(employee_repo, audit_repo)
@@ -64,7 +64,7 @@ async def get_employees(skip: int = 0, limit: int = 100, current_user: dict = De
     return employees
 
 @employee_router.get("/{employee_id}")
-async def get_employee(employee_id: str, current_user: dict = Depends(get_current_user)):
+async def get_employee(employee_id: str, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
     employee_service = EmployeeService(employee_repo, audit_repo)
@@ -75,7 +75,7 @@ async def get_employee(employee_id: str, current_user: dict = Depends(get_curren
     return employee
 
 @employee_router.patch("/{employee_id}")
-async def update_employee(employee_id: str, request: UpdateEmployeeRequest, current_user: dict = Depends(get_current_user)):
+async def update_employee(employee_id: str, request: UpdateEmployeeRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
     employee_service = EmployeeService(employee_repo, audit_repo)
@@ -91,7 +91,7 @@ async def update_employee(employee_id: str, request: UpdateEmployeeRequest, curr
     return employee
 
 @measure_router.post("/")
-async def create_measure(request: CreateMeasureRequest, current_user: dict = Depends(get_current_user)):
+async def create_measure(request: CreateMeasureRequest, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     measure_repo = MeasureRepository(db)
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
@@ -107,7 +107,7 @@ async def create_measure(request: CreateMeasureRequest, current_user: dict = Dep
         raise HTTPException(status_code=400, detail=str(e))
 
 @measure_router.get("/")
-async def get_measures(skip: int = 0, limit: int = 100, current_user: dict = Depends(get_current_user)):
+async def get_measures(skip: int = 0, limit: int = 100, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     measure_repo = MeasureRepository(db)
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
@@ -117,7 +117,7 @@ async def get_measures(skip: int = 0, limit: int = 100, current_user: dict = Dep
     return measures
 
 @measure_router.get("/dashboard/stats", response_model=DashboardStatsResponse)
-async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
+async def get_dashboard_stats(current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     measure_repo = MeasureRepository(db)
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
@@ -127,7 +127,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     return stats
 
 @measure_router.get("/employee/{employee_id}")
-async def get_employee_measures(employee_id: str, current_user: dict = Depends(get_current_user)):
+async def get_employee_measures(employee_id: str, current_user: dict = Depends(get_current_user), db = Depends(get_db)):
     measure_repo = MeasureRepository(db)
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
@@ -137,7 +137,7 @@ async def get_employee_measures(employee_id: str, current_user: dict = Depends(g
     return measures
 
 @measure_router.post("/sign")
-async def sign_measure(request: SignMeasureRequest, current_user: dict = Depends(require_roles(["juridico", "rh"]))):
+async def sign_measure(request: SignMeasureRequest, current_user: dict = Depends(require_roles(["juridico", "rh"])), db = Depends(get_db)):
     measure_repo = MeasureRepository(db)
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
@@ -155,7 +155,7 @@ async def sign_measure(request: SignMeasureRequest, current_user: dict = Depends
         raise HTTPException(status_code=400, detail=str(e))
 
 @measure_router.post("/cancel")
-async def cancel_measure(request: CancelMeasureRequest, current_user: dict = Depends(require_roles(["juridico", "rh"]))):
+async def cancel_measure(request: CancelMeasureRequest, current_user: dict = Depends(require_roles(["juridico", "rh"])), db = Depends(get_db)):
     measure_repo = MeasureRepository(db)
     employee_repo = EmployeeRepository(db)
     audit_repo = AuditLogRepository(db)
@@ -173,7 +173,7 @@ async def cancel_measure(request: CancelMeasureRequest, current_user: dict = Dep
         raise HTTPException(status_code=400, detail=str(e))
 
 @audit_router.get("/logs")
-async def get_audit_logs(limit: int = 100, current_user: dict = Depends(require_roles(["juridico", "rh"]))):
+async def get_audit_logs(limit: int = 100, current_user: dict = Depends(require_roles(["juridico", "rh"])), db = Depends(get_db)):
     audit_repo = AuditLogRepository(db)
     audit_service = AuditService(audit_repo)
     
